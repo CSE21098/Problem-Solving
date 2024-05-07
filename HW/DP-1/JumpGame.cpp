@@ -1,24 +1,48 @@
 class Solution {
 public:
-    int jump(vector<int>& nums) {
-        int N = nums.size();
-        vector<int> memory(N, -1);
-        return solveWithMemo(memory, nums, N, 0);
-    }
-    int solveWithMemo(vector<int>& memory, vector<int>& nums, int N, int index) {
-        if(index == N - 1)
+    int solve(int i, int n, vector<int>& nums) {
+        if(i == n-1) 
             return 0;
-        if(index >= N)
-            return INT_MAX;
-        if(memory[index] != -1)
-            return memory[index];
-        int minJumps = INT_MAX;
-        for(int jump = 1; jump <= nums[index]; ++jump) {
-            int currJumps = solveWithMemo(memory, nums, N, index + jump);
-            if(currJumps != INT_MAX) {
-                minJumps = min(minJumps, 1 + currJumps);
+        int mini = 1e8;
+        for(int j = i+1; (j <= i+nums[i] and j < n); j++) {
+            mini = min(mini, 1+solve(j, n, nums));
+        }
+        return mini;
+    }
+    int solveMem(int i, int n, vector<int>& nums, vector<int> &dp) {
+        if(i == n-1) 
+            return 0;
+        if(dp[i]!=-1){
+            return dp[i];
+        }
+        int mini = 1e8;
+        for(int j = i+1; (j <= i+nums[i] and j < n); j++) {
+            mini = min(mini, 1+solveMem(j, n, nums,dp));
+        }
+        return dp[i] = mini;
+    }
+    
+    int solveTab(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> dp(n, -1);
+        for(int i = n-1; i >= 0; i--) {
+            if(i == n-1) 
+                dp[i] = 0;
+            else {
+                int minSteps = 1e8;
+                for(int j = i+1; (j <= i+nums[i] and j < n); j++) {
+                    minSteps = min(minSteps, 1+dp[j]);
+                }
+                dp[i] = minSteps;
             }
         }
-        return memory[index] = minJumps;
+        return dp[0];
+    }
+    int jump(vector<int>& nums) {
+        // return solve(0, nums.size(), nums);
+        // vector<int> dp(nums.size(), -1);
+        // return solve(0, nums.size(), nums,dp);
+        return solveTab(nums);
+
     }
 };
